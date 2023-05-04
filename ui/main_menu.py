@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import *
-#from tkinter.ttk import *
 from PIL import ImageTk
-import os
 import PIL.Image
 from ui.colors import Colors
-from data.file_handler import FileHandler
+import data.file_handler as fh
+import tkinterDnD
 
 main_bg_color = Colors.ukt_blue_dark_1
+sidebar_color = Colors.ukt_black
 visualization_bg_color = Colors.ukt_blue_dark_1
 main_button_color = Colors.ukt_gold
 
@@ -19,21 +19,21 @@ claasenlab_image_height = 67
 class UI:
 
     def __init__(self, master=None):
-        self.fh = FileHandler(self)
+        self.fh = fh.FileHandler(self)
         self.file_name = self.fh.file_name
 
         # top UI level widget
-        top_level = tk.Tk() if master is None else tk.Toplevel(master)
+        top_level = tkinterDnD.Tk() if master is None else tk.Toplevel(master)
         top_level.title("RNA velocity")
         top_level.state("zoomed")
-        top_level.configure(height=1080, width=1920, bg=main_bg_color)
+        top_level.configure(height=5, width=1920, bg=main_bg_color)
         top_level.resizable(True, True)
         self.mainwindow = top_level
 
         # sidebar frame (left)
         self.sidebar_frame = tk.Frame(top_level)
         self.sidebar_frame.configure(
-            height=1080, width=sidebar_width, bg=Colors.ukt_black)
+            height=1080, width=sidebar_width, bg=sidebar_color)
         self.sidebar_frame.pack(side="left")
         self.sidebar_frame.pack_propagate(False)
 
@@ -44,6 +44,7 @@ class UI:
         self.analysis_frame.pack(side="right")
         self.analysis_frame.pack_propagate(False)
 
+        # create the UI elements
         self.create_file_name_label()
         self.create_file_dnd_field()
         self.create_buttons()
@@ -59,7 +60,7 @@ class UI:
         self.file_name_label.pack(pady=10, side="top")
 
     def create_file_dnd_field(self):
-        # the field you can drop files at
+        # the field you can drop files into
         self.dnd_field = tk.Frame(self.sidebar_frame)
         self.dnd_field.configure(width=200, height=200, bg=main_button_color)
         self.dnd_field.pack(pady=20, side="top")
@@ -67,6 +68,12 @@ class UI:
         label = tk.Label(
             self.dnd_field, text="Drop a BAM/FASTQ file here", bg=main_button_color)
         label.place(relx=0.5, rely=0.5, anchor=CENTER)
+        self.dnd_field.register_drop_target("*")
+        self.dnd_field.bind("<<Drop>>", self.drop)
+
+    def drop(self, event):
+        # This function is called when stuff is dropped into the dnd_field
+        self.fh.open_file_by_dnd(event.data)
 
     def create_buttons(self):
         # button to browse the file explorer
@@ -142,9 +149,6 @@ class UI:
 
     def resize_arc(canvas, arc, coord):
         canvas.coords(arc, coord)
-
-    # def run(self):
-        # self.mainwindow.mainloop()
 
     def clickRun(self):
         self.canvas2.delete(self.arc1)

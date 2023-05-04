@@ -28,18 +28,41 @@ class FileHandler:
         """
 
         # open the file explorer and let the user select a file
-        filePath = fd.askopenfilename(
+        file_path = fd.askopenfilename(
             title=explorer_title,
             filetypes=filetypes
         )
 
         # if the user cancelled
-        if len(filePath) == 0:
+        if len(file_path) == 0:
             return
 
         # save the data and the last part of the file name
-        self.file_data = open(filePath)
-        self.file_name = os.path.basename(filePath)
+        self.file_data = open(file_path)
+        self.file_name = os.path.basename(file_path)
 
         # update the UI to show the name of the loaded file
         self.ui.updateUI()
+
+    def open_file_by_dnd(self, file_path):
+        """
+        This method is called when there is a drag-and-drop event.
+        It checks whether the file type is valid and processes the file
+        if that's the case.
+        """
+
+        # exclude brackets
+        file_path = file_path[1:len(file_path)-1]
+
+        # get the file type
+        file_extension = os.path.splitext(file_path)[1]
+
+        # check whether it matches a valid one
+        for t in filetypes:
+            # exclude the * from t[1]
+            t = t[1][1:len(t[1])]
+
+            if t == file_extension:
+                self.file_name = os.path.basename(file_path)
+                self.ui.updateUI()
+                return
