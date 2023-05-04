@@ -1,9 +1,6 @@
 import tkinter as tk
-import tkinter.ttk as ttk
 from tkinter import filedialog
-from PIL import ImageTk, Image
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from PIL import ImageTk
 from tkinter import *
 import os
 import PIL.Image
@@ -18,11 +15,13 @@ class UIClaasen:
         self.frame_main = tk.Frame(toplevel1)
         self.frame_main.configure(height=600, width=800, bg='#d1ccc4')
         self.Unspliced_File = tk.Button(self.frame_main)
-        self.Unspliced_File.configure(text='Upload Unspliced Data File', bg='#baa874')
+        self.Unspliced_File.configure(
+            text='Upload Unspliced Data File', bg='#baa874')
         self.Unspliced_File.pack(pady=5, side="top")
         self.Unspliced_File.configure(command=self.unspliced_file_upload)
         self.Spliced_File = tk.Button(self.frame_main)
-        self.Spliced_File.configure(text='Upload Spliced Date File', bg='#baa874')
+        self.Spliced_File.configure(
+            text='Upload Spliced Date File', bg='#baa874')
         self.Spliced_File.pack(pady=5, side="top")
         self.Spliced_File.configure(command=self.spliced_file_upload)
         self.Analyse = tk.Menubutton(self.frame_main)
@@ -82,34 +81,38 @@ class UIClaasen:
         self.runbutton.pack(pady=10, side="right")
         frame4.pack(side="top")
 
-    
         self.canvas2 = tk.Canvas(toplevel1)
         self.canvas2.configure(height=200, width=500)
-        self.canvas2.pack(padx=20,pady=20, side="bottom")
+        self.canvas2.pack(padx=20, pady=20, side="bottom")
         self.canvas2.update()
         coord = 10, 10, self.canvas2.winfo_width(), self.canvas2.winfo_height()
-        self.arc1 = self.canvas2.create_arc(coord, start=0, extent=150, fill="red")
-        self.arc2 = self.canvas2.create_arc(coord, start=150, extent=215, fill="green")
-        self.canvas2.pack(fill=BOTH,expand=TRUE)
+        self.arc1 = self.canvas2.create_arc(
+            coord, start=0, extent=150, fill="red")
+        self.arc2 = self.canvas2.create_arc(
+            coord, start=150, extent=215, fill="green")
+        self.canvas2.pack(fill=BOTH, expand=TRUE)
         """ canvas2.bind('<Configure>', lambda event: resize_arc(canvas2, arc1, coord)) """
 
-        image_Claasen = PIL.Image.open("/home/ulyana/Schreibtisch/UI_Teamprojekt/Teamproject-2023/ui/images/claassen_lab_logo.png")
+        image_Claasen = PIL.Image.open(
+            "ui/images/claassen_lab_logo.png")
         image_Claasen = image_Claasen.resize((200, 200), PIL.Image.ANTIALIAS)
         image_Claasen = ImageTk.PhotoImage(image_Claasen)
         panel = Label(self.frame_main, image=image_Claasen, bg='#d1ccc4')
         panel.image = image_Claasen
         panel.pack(pady=10, side="top")
 
-        imageUniKlinikum = PIL.Image.open('/home/ulyana/Schreibtisch/UI_Teamprojekt/Teamproject-2023/ui/images/UniklinikumTübingen.png')
-        imageUniKlinikum = imageUniKlinikum.resize((137*2, 46*2), PIL.Image.ANTIALIAS)
+        imageUniKlinikum = PIL.Image.open(
+            'ui/images/UniklinikumTübingen.png')
+        imageUniKlinikum = imageUniKlinikum.resize(
+            (137*2, 46*2), PIL.Image.ANTIALIAS)
         imageUniKlinikum = ImageTk.PhotoImage(imageUniKlinikum)
         panel = Label(self.frame_main, image=imageUniKlinikum, bg='#d1ccc4')
         panel.image = imageUniKlinikum
         panel.pack(side="left", anchor="sw")
 
-
         # Main widget
         self.mainwindow = toplevel1
+
     def resize_arc(canvas, arc, coord):
         canvas.coords(arc, coord)
 
@@ -117,10 +120,12 @@ class UIClaasen:
         self.mainwindow.mainloop()
 
     def unspliced_file_upload(self):
-        self.filename = filedialog.askopenfilename(initialdir="", title="Select A File", filetypes=(("BAM files", "*.bam"),("FASTQ Files", "*.fastq")))
+        self.filename = filedialog.askopenfilename(initialdir="", title="Select A File", filetypes=(
+            ("BAM files", "*.bam"), ("FASTQ Files", "*.fastq")))
 
     def spliced_file_upload(self):
-        self.filename = filedialog.askopenfilename(initialdir="", title="Select A File", filetypes=(("BAM files", "*.bam"),("FASTQ Files", "*.fastq")))
+        self.filename = filedialog.askopenfilename(initialdir="", title="Select A File", filetypes=(
+            ("BAM files", "*.bam"), ("FASTQ Files", "*.fastq")))
 
     def clickRun(self):
         self.canvas2.delete(self.arc1)
