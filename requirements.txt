@@ -3,4 +3,5 @@ pytest
 tk
 python-tkdnd
 os
+io
 PIL
