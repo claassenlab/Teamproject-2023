@@ -2,4 +2,4 @@ flake8
 pytest
 tk
 python-tkdnd
-PIL
+Pillow
