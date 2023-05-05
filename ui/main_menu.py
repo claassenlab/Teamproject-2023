@@ -26,22 +26,27 @@ class UI:
         # top UI level widget
         top_level = tkinterDnD.Tk()
         top_level.title("RNA velocity")
+        # "fullscreen" when starting the app
         top_level.state("zoomed")
-        top_level.configure(height=5, width=1920, bg=main_bg_color)
+        # window size when minimizing
+        top_level.geometry("1200x700")
+        # minimum window size
+        top_level.minsize(width=900, height=700)
+        top_level.configure(width=1920, height=1080, bg=main_bg_color)
         top_level.resizable(True, True)
         self.mainwindow = top_level
 
         # sidebar frame (left)
         self.sidebar_frame = tk.Frame(top_level)
         self.sidebar_frame.configure(
-            height=1080, width=sidebar_width, bg=sidebar_color)
+            width=sidebar_width, height=1080, bg=sidebar_color)
         self.sidebar_frame.pack(side="left")
         self.sidebar_frame.pack_propagate(False)
 
         # analysis frame (right)
         self.analysis_frame = tk.Frame(top_level)
         self.analysis_frame.configure(
-            height=1080, width=1920-sidebar_width, bg=main_bg_color)
+            width=1920-sidebar_width, height=1080, bg=main_bg_color)
         self.analysis_frame.pack(side="right")
         self.analysis_frame.pack_propagate(False)
 
@@ -108,7 +113,7 @@ class UI:
 
         # button to run the analysis
         run_frame = tk.Frame(self.analysis_frame)
-        run_frame.configure(height=200, width=200, bg=main_bg_color)
+        run_frame.configure(width=200, height=200, bg=main_bg_color)
         self.runbutton = tk.Button(run_frame)
         self.runbutton.configure(
             image=self.run_button_image, width=200, height=50, borderwidth=0)
@@ -147,7 +152,7 @@ class UI:
 
     def create_visualization_canvas(self):
         self.canvas2 = tk.Canvas(self.analysis_frame)
-        self.canvas2.configure(height=200, width=500,
+        self.canvas2.configure(width=500, height=200,
                                bg=visualization_bg_color)
         self.canvas2.pack(side="bottom")
         self.canvas2.update()
