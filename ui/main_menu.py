@@ -18,12 +18,13 @@ claasenlab_image_height = 67
 
 class UI:
 
-    def __init__(self, master=None):
+    def __init__(self):
+        # add file handler
         self.fh = fh.FileHandler(self)
         self.file_name = self.fh.file_name
 
         # top UI level widget
-        top_level = tkinterDnD.Tk() if master is None else tk.Toplevel(master)
+        top_level = tkinterDnD.Tk()
         top_level.title("RNA velocity")
         top_level.state("zoomed")
         top_level.configure(height=5, width=1920, bg=main_bg_color)
@@ -44,6 +45,18 @@ class UI:
         self.analysis_frame.pack(side="right")
         self.analysis_frame.pack_propagate(False)
 
+        # load button images here due to garbage collection
+        self.dnd_field_image = PhotoImage(
+            file="ui/images/buttons/dnd_field_image.png", width=208, height=208)
+        self.browse_files_button_image = PhotoImage(
+            file="ui/images/buttons/browse_files_button_image.png", width=208, height=58)
+        self.analysis_menu_button_image = PhotoImage(
+            file="ui/images/buttons/analysis_menu_button_image.png", width=208, height=58)
+        self.save_results_button_image = PhotoImage(
+            file="ui/images/buttons/save_results_button_image.png", width=208, height=58)
+        self.run_button_image = PhotoImage(
+            file="ui/images/buttons/run_button_image.png", width=208, height=58)
+
         # create the UI elements
         self.create_file_name_label()
         self.create_file_dnd_field()
@@ -57,17 +70,15 @@ class UI:
         # text indicating the currently loaded file
         self.file_name_label = tk.Label(
             self.sidebar_frame, text=self.fh.file_name)
-        self.file_name_label.pack(pady=10, side="top")
+        self.file_name_label.pack(pady=20, side="top")
 
     def create_file_dnd_field(self):
         # the field you can drop files into
-        self.dnd_field = tk.Frame(self.sidebar_frame)
-        self.dnd_field.configure(width=200, height=200, bg=main_button_color)
+        self.dnd_field = tk.Label(self.sidebar_frame)
+        self.dnd_field.configure(
+            image=self.dnd_field_image, width=200, height=200, borderwidth=0)
         self.dnd_field.pack(pady=20, side="top")
         self.dnd_field.pack_propagate(False)
-        label = tk.Label(
-            self.dnd_field, text="Drop a BAM/FASTQ file here", bg=main_button_color)
-        label.place(relx=0.5, rely=0.5, anchor=CENTER)
         self.dnd_field.register_drop_target("*")
         self.dnd_field.bind("<<Drop>>", self.drop)
 
@@ -79,30 +90,31 @@ class UI:
         # button to browse the file explorer
         file_upload_button = tk.Button(self.sidebar_frame)
         file_upload_button.configure(
-            text="Browse files", bg=main_button_color)
+            image=self.browse_files_button_image, width=200, height=50, borderwidth=0)
         file_upload_button.pack(pady=20, side="top")
         file_upload_button.configure(command=self.fh.open_file_by_explorer)
 
         # button to configure the analysis
         analysis_menu_button = tk.Button(self.sidebar_frame)
         analysis_menu_button.configure(
-            text="Analysis menu", bg=main_button_color)
+            image=self.analysis_menu_button_image, width=200, height=50, borderwidth=0)
         analysis_menu_button.pack(pady=20, side="top")
-
-        # button to run the analysis
-        frame4 = tk.Frame(self.analysis_frame)
-        frame4.configure(height=200, width=200, bg=main_bg_color)
-        self.runbutton = tk.Button(frame4)
-        self.runbutton.configure(text="▶ Run Analysis", bg=main_button_color)
-        self.runbutton.configure(command=self.clickRun)
-        self.runbutton.pack(padx=10, pady=10, side="right")
-        frame4.pack(side="top")
 
         # button to save the results
         save_result_button = tk.Button(self.sidebar_frame)
         save_result_button.configure(
-            text="Save results", bg=main_button_color)
+            image=self.save_results_button_image, width=200, height=50, borderwidth=0)
         save_result_button.pack(pady=20, side="top")
+
+        # button to run the analysis
+        run_frame = tk.Frame(self.analysis_frame)
+        run_frame.configure(height=200, width=200, bg=main_bg_color)
+        self.runbutton = tk.Button(run_frame)
+        self.runbutton.configure(
+            image=self.run_button_image, width=200, height=50, borderwidth=0)
+        self.runbutton.configure(command=self.clickRun)
+        self.runbutton.pack(padx=10, pady=10, side="right")
+        run_frame.pack(side="top")
 
     def place_images(self):
         bottom_bar = tk.Frame(self.sidebar_frame)
@@ -112,7 +124,7 @@ class UI:
         bottom_bar.pack_propagate(False)
 
         image_claasenlab = PIL.Image.open(
-            "ui/images/claassen_lab_logo.png")
+            "ui/images/logos/claassen_lab_logo.png")
         image_claasenlab = image_claasenlab.resize(
             (claasenlab_image_height, claasenlab_image_height), PIL.Image.ANTIALIAS)
         image_claasenlab = ImageTk.PhotoImage(image_claasenlab)
@@ -122,7 +134,7 @@ class UI:
         panel.pack(padx=5, side="left")
 
         image_uni_klinikum = PIL.Image.open(
-            "ui/images/UniklinikumTübingen.png")
+            "ui/images/logos/UniklinikumTübingen.png")
         # both should have the same height
         scale = image_uni_klinikum.height / claasenlab_image_height
         image_uni_klinikum = image_uni_klinikum. resize(
@@ -145,7 +157,6 @@ class UI:
         self.arc2 = self.canvas2.create_arc(
             coord, start=150, extent=215, fill="green")
         self.canvas2.pack(fill=BOTH, expand=TRUE)
-        """ canvas2.bind("<Configure>", lambda event: resize_arc(canvas2, arc1, coord)) """
 
     def resize_arc(canvas, arc, coord):
         canvas.coords(arc, coord)
