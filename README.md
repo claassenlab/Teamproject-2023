@@ -1,3 +1,6 @@
+## Run the application
+Simply run `app.py` in your IDE or use the terminal (`python app.py` by default).
+
 ## Set up the IDE
 We are using VS Code. To set it up, read [this](https://github.com/claassenlab/Teamproject-2023/wiki/Information-about-CI-and-VS-Code).
 
