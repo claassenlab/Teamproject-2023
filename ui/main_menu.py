@@ -13,7 +13,7 @@ main_button_color = Colors.ukt_gold
 
 sidebar_width = 300
 bottombar_height = 100
-claasenlab_image_height = 67
+claassenlab_image_height = 67
 min_height = 700
 min_width = 900
 base_height = 1080
@@ -139,7 +139,7 @@ class UI:
         image_claasenlab = PIL.Image.open(
             "ui/images/logos/claassen_lab_logo.png")
         image_claasenlab = image_claasenlab.resize(
-            (claasenlab_image_height, claasenlab_image_height), PIL.Image.ANTIALIAS)
+            (claassenlab_image_height, claassenlab_image_height), PIL.Image.ANTIALIAS)
         image_claasenlab = ImageTk.PhotoImage(image_claasenlab)
         panel = Label(bottom_bar, image=image_claasenlab,
                       bg=Colors.ukt_greige)
@@ -149,7 +149,7 @@ class UI:
         image_uni_klinikum = PIL.Image.open(
             "ui/images/logos/UniklinikumTübingen.png")
         # both should have the same height
-        scale = image_uni_klinikum.height / claasenlab_image_height
+        scale = image_uni_klinikum.height / claassenlab_image_height
         image_uni_klinikum = image_uni_klinikum. resize(
             (int(image_uni_klinikum.width / scale), int(image_uni_klinikum.height / scale)), PIL.Image.ANTIALIAS)
         image_uni_klinikum = ImageTk.PhotoImage(image_uni_klinikum)
