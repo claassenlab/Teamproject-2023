@@ -15,13 +15,15 @@ sidebar_width = 300
 bottombar_height = 100
 claassenlab_image_height = 67
 min_height = 700
-min_width = 900
+min_width_window = 900
+min_width = 1200
 base_height = 1080
 base_width = 1920
 button_height = 58
 click_field_height = 50
 button_width = 208
 click_field_width = 200
+min_window_dimensions = "1200x700"
 
 
 class UI:
@@ -37,9 +39,9 @@ class UI:
         # "fullscreen" when starting the app
         top_level.state("zoomed")
         # window size when minimizing
-        top_level.geometry("1200x700")
+        top_level.geometry(min_window_dimensions)
         # minimum window size
-        top_level.minsize(width=min_width, height=min_height)
+        top_level.minsize(width=min_width_window, height=min_height)
         top_level.configure(width=base_width, height=base_height, bg=main_bg_color)
         top_level.resizable(True, True)
         self.mainwindow = top_level
@@ -132,7 +134,7 @@ class UI:
     def place_images(self):
         bottom_bar = tk.Frame(self.sidebar_frame)
         bottom_bar.configure(width=sidebar_width,
-                             height=bottombar_height, bg=main_bg_color)
+                             height=bottombar_height, bg=visualization_bg_color)
         bottom_bar.pack(side="bottom")
         bottom_bar.pack_propagate(False)
 
@@ -147,7 +149,7 @@ class UI:
         panel.pack(padx=5, side="left")
 
         image_uni_klinikum = PIL.Image.open(
-            "ui/images/logos/UniklinikumTübingen.png")
+            "ui/images/logos/Uniklinikum-Logo2.png")
         # both should have the same height
         scale = image_uni_klinikum.height / claassenlab_image_height
         image_uni_klinikum = image_uni_klinikum. resize(
