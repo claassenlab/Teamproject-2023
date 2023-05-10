@@ -6,14 +6,24 @@ from ui.colors import Colors
 import data.file_handler as fh
 import tkinterDnD
 
-main_bg_color = Colors.ukt_blue_dark_1
+main_bg_color = Colors.ukt_black
 sidebar_color = Colors.ukt_black
 visualization_bg_color = Colors.ukt_blue_dark_1
 main_button_color = Colors.ukt_gold
 
 sidebar_width = 300
 bottombar_height = 100
-claasenlab_image_height = 67
+claassenlab_image_height = 78
+min_height = 700
+min_width_window = 900
+min_width = 1200
+base_height = 1080
+base_width = 1920
+button_height = 58
+click_field_height = 50
+button_width = 208
+click_field_width = 200
+min_window_dimensions = "1200x700"
 
 
 class UI:
@@ -29,38 +39,39 @@ class UI:
         # "fullscreen" when starting the app
         top_level.state("zoomed")
         # window size when minimizing
-        top_level.geometry("1200x700")
+        top_level.geometry(min_window_dimensions)
         # minimum window size
-        top_level.minsize(width=900, height=700)
-        top_level.configure(width=1920, height=1080, bg=main_bg_color)
+        top_level.minsize(width=min_width_window, height=min_height)
+        top_level.configure(
+            width=base_width, height=base_height, bg=main_bg_color)
         top_level.resizable(True, True)
         self.mainwindow = top_level
 
         # sidebar frame (left)
         self.sidebar_frame = tk.Frame(top_level)
         self.sidebar_frame.configure(
-            width=sidebar_width, height=1080, bg=sidebar_color)
+            width=sidebar_width, height=base_height, bg=sidebar_color)
         self.sidebar_frame.pack(side="left")
         self.sidebar_frame.pack_propagate(False)
 
         # analysis frame (right)
         self.analysis_frame = tk.Frame(top_level)
         self.analysis_frame.configure(
-            width=1920-sidebar_width, height=1080, bg=main_bg_color)
+            width=base_width-sidebar_width, height=base_height, bg=main_bg_color)
         self.analysis_frame.pack(side="right")
         self.analysis_frame.pack_propagate(False)
 
         # load button images here due to garbage collection
         self.dnd_field_image = PhotoImage(
-            file="ui/images/buttons/dnd_field_image.png", width=208, height=208)
+            file="ui/images/buttons/dnd_field_image.png", width=button_width, height=button_width)
         self.browse_files_button_image = PhotoImage(
-            file="ui/images/buttons/browse_files_button_image.png", width=208, height=58)
+            file="ui/images/buttons/browse_files_button_image.png", width=button_width, height=button_height)
         self.analysis_menu_button_image = PhotoImage(
-            file="ui/images/buttons/analysis_menu_button_image.png", width=208, height=58)
+            file="ui/images/buttons/analysis_menu_button_image.png", width=button_width, height=button_height)
         self.save_results_button_image = PhotoImage(
-            file="ui/images/buttons/save_results_button_image.png", width=208, height=58)
+            file="ui/images/buttons/save_results_button_image.png", width=button_width, height=button_height)
         self.run_button_image = PhotoImage(
-            file="ui/images/buttons/run_button_image.png", width=208, height=58)
+            file="ui/images/buttons/run_button_image.png", width=button_width, height=button_height)
 
         # create the UI elements
         self.create_file_name_label()
@@ -81,7 +92,7 @@ class UI:
         # the field you can drop files into
         self.dnd_field = tk.Label(self.sidebar_frame)
         self.dnd_field.configure(
-            image=self.dnd_field_image, width=200, height=200, borderwidth=0)
+            image=self.dnd_field_image, width=click_field_width, height=click_field_width, borderwidth=0)
         self.dnd_field.pack(pady=20, side="top")
         self.dnd_field.pack_propagate(False)
         self.dnd_field.register_drop_target("*")
@@ -95,20 +106,20 @@ class UI:
         # button to browse the file explorer
         file_upload_button = tk.Button(self.sidebar_frame)
         file_upload_button.configure(
-            image=self.browse_files_button_image, width=200, height=50, borderwidth=0)
+            image=self.browse_files_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         file_upload_button.pack(pady=20, side="top")
         file_upload_button.configure(command=self.fh.open_file_by_explorer)
 
         # button to configure the analysis
         analysis_menu_button = tk.Button(self.sidebar_frame)
         analysis_menu_button.configure(
-            image=self.analysis_menu_button_image, width=200, height=50, borderwidth=0)
+            image=self.analysis_menu_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         analysis_menu_button.pack(pady=20, side="top")
 
         # button to save the results
         save_result_button = tk.Button(self.sidebar_frame)
         save_result_button.configure(
-            image=self.save_results_button_image, width=200, height=50, borderwidth=0)
+            image=self.save_results_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         save_result_button.pack(pady=20, side="top")
 
         # button to run the analysis
@@ -116,7 +127,7 @@ class UI:
         run_frame.configure(width=200, height=200, bg=main_bg_color)
         self.runbutton = tk.Button(run_frame)
         self.runbutton.configure(
-            image=self.run_button_image, width=200, height=50, borderwidth=0)
+            image=self.run_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         self.runbutton.configure(command=self.clickRun)
         self.runbutton.pack(padx=10, pady=10, side="right")
         run_frame.pack(side="top")
@@ -124,14 +135,14 @@ class UI:
     def place_images(self):
         bottom_bar = tk.Frame(self.sidebar_frame)
         bottom_bar.configure(width=sidebar_width,
-                             height=bottombar_height, bg=main_bg_color)
+                             height=bottombar_height, bg=visualization_bg_color)
         bottom_bar.pack(side="bottom")
         bottom_bar.pack_propagate(False)
 
         image_claasenlab = PIL.Image.open(
             "ui/images/logos/claassen_lab_logo.png")
         image_claasenlab = image_claasenlab.resize(
-            (claasenlab_image_height, claasenlab_image_height), PIL.Image.ANTIALIAS)
+            (claassenlab_image_height, claassenlab_image_height), PIL.Image.ANTIALIAS)
         image_claasenlab = ImageTk.PhotoImage(image_claasenlab)
         panel = Label(bottom_bar, image=image_claasenlab,
                       bg=Colors.ukt_greige)
@@ -141,8 +152,8 @@ class UI:
         image_uni_klinikum = PIL.Image.open(
             "ui/images/logos/UniklinikumTübingen.png")
         # both should have the same height
-        scale = image_uni_klinikum.height / claasenlab_image_height
-        image_uni_klinikum = image_uni_klinikum. resize(
+        scale = image_uni_klinikum.height / claassenlab_image_height
+        image_uni_klinikum = image_uni_klinikum.resize(
             (int(image_uni_klinikum.width / scale), int(image_uni_klinikum.height / scale)), PIL.Image.ANTIALIAS)
         image_uni_klinikum = ImageTk.PhotoImage(image_uni_klinikum)
         panel = Label(bottom_bar, image=image_uni_klinikum,
