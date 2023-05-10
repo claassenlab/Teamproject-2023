@@ -13,7 +13,7 @@ main_button_color = Colors.ukt_gold
 
 sidebar_width = 300
 bottombar_height = 100
-claassenlab_image_height = 67
+claassenlab_image_height = 78
 min_height = 700
 min_width_window = 900
 min_width = 1200
@@ -42,7 +42,8 @@ class UI:
         top_level.geometry(min_window_dimensions)
         # minimum window size
         top_level.minsize(width=min_width_window, height=min_height)
-        top_level.configure(width=base_width, height=base_height, bg=main_bg_color)
+        top_level.configure(
+            width=base_width, height=base_height, bg=main_bg_color)
         top_level.resizable(True, True)
         self.mainwindow = top_level
 
@@ -149,10 +150,10 @@ class UI:
         panel.pack(padx=5, side="left")
 
         image_uni_klinikum = PIL.Image.open(
-            "ui/images/logos/Uniklinikum-Logo2.png")
+            "ui/images/logos/UniklinikumTübingen.png")
         # both should have the same height
         scale = image_uni_klinikum.height / claassenlab_image_height
-        image_uni_klinikum = image_uni_klinikum. resize(
+        image_uni_klinikum = image_uni_klinikum.resize(
             (int(image_uni_klinikum.width / scale), int(image_uni_klinikum.height / scale)), PIL.Image.ANTIALIAS)
         image_uni_klinikum = ImageTk.PhotoImage(image_uni_klinikum)
         panel = Label(bottom_bar, image=image_uni_klinikum,
