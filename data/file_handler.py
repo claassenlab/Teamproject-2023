@@ -1,6 +1,7 @@
 from tkinter import filedialog as fd
 from io import TextIOWrapper
 import os
+from tkinter import Listbox
 
 
 explorer_title = "Select a file to open"
@@ -44,22 +45,36 @@ class FileHandler:
         # update the UI to show the name of the loaded file
         self.ui.updateUI()
 
-    def open_file_by_dnd(self, file_path):
+    def open_file_by_dnd(self, file_paths):
         """
         This method is called when there is a drag-and-drop event.
         It checks whether the file type is valid and processes the file
         if that's the case.
         """
 
-        # exclude brackets
-        file_path = file_path[1:len(file_path)-1]
+        # convert the file paths to a list using a function from Listbox
+        listbox = Listbox()
+        files = listbox.tk.splitlist(file_paths)
+
+        # pick the first file path, even if the user accidentally dropped multiple files
+        file_path = files[0]
 
         # get the file type
         file_extension = os.path.splitext(file_path)[1]
 
-        # check whether it matches a valid one
+        # if the file name is empty, we have to get the file extension in a dirty way
+        # but in general, it is not that bad if one cannot load such files via dnd
+        if len(file_extension) == 0:
+            for i in reversed(range(len(file_path))):
+                currentChar = file_path[i]
+                # for Windows this works, maybe add alternatives for other OS
+                if currentChar == "/":
+                    break
+                file_extension = file_path[i] + file_extension
+
+        # check whether the extension matches a valid one
         for t in filetypes:
-            # exclude the * from t[1]
+            # exclude the *
             t = t[1][1:len(t[1])]
 
             if t == file_extension:
