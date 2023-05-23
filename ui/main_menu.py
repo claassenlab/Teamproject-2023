@@ -4,7 +4,7 @@ from PIL import ImageTk
 import PIL.Image
 from ui.colors import Colors
 import data.file_handler as fh
-import tkinterDnD
+from tkinterdnd2 import *
 
 main_bg_color = Colors.ukt_black
 sidebar_color = Colors.ukt_black
@@ -34,7 +34,7 @@ class UI:
         self.file_name = self.fh.file_name
 
         # top UI level widget
-        top_level = tkinterDnD.Tk()
+        top_level = TkinterDnD.Tk()
         top_level.title("RNA velocity")
         # "fullscreen" when starting the app
         top_level.state("zoomed")
@@ -95,12 +95,13 @@ class UI:
             image=self.dnd_field_image, width=click_field_width, height=click_field_width, borderwidth=0)
         self.dnd_field.pack(pady=20, side="top")
         self.dnd_field.pack_propagate(False)
-        self.dnd_field.register_drop_target("*")
-        self.dnd_field.bind("<<Drop>>", self.drop)
+        self.dnd_field.drop_target_register(DND_FILES)
+        self.dnd_field.dnd_bind("<<Drop>>", self.drop)
 
     def drop(self, event):
         # This function is called when stuff is dropped into the dnd_field
-        self.fh.open_file_by_dnd(event.data)
+        if event.data:
+            self.fh.open_file_by_dnd(event.data)
 
     def create_buttons(self):
         # button to browse the file explorer
@@ -150,7 +151,7 @@ class UI:
         panel.pack(padx=5, side="left")
 
         image_uni_klinikum = PIL.Image.open(
-            "ui/images/logos/UniklinikumTübingen.png")
+            "ui/images/logos/UniklinikumTuebingen.png")
         # both should have the same height
         scale = image_uni_klinikum.height / claassenlab_image_height
         image_uni_klinikum = image_uni_klinikum.resize(
