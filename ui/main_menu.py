@@ -1,4 +1,3 @@
-import tkinter as tk
 from tkinter import *
 from PIL import ImageTk
 import PIL.Image
@@ -48,14 +47,14 @@ class UI:
         self.mainwindow = top_level
 
         # sidebar frame (left)
-        self.sidebar_frame = tk.Frame(top_level)
+        self.sidebar_frame = Frame(top_level)
         self.sidebar_frame.configure(
             width=sidebar_width, height=base_height, bg=sidebar_color)
         self.sidebar_frame.pack(side="left")
         self.sidebar_frame.pack_propagate(False)
 
         # analysis frame (right)
-        self.analysis_frame = tk.Frame(top_level)
+        self.analysis_frame = Frame(top_level)
         self.analysis_frame.configure(
             width=base_width-sidebar_width, height=base_height, bg=main_bg_color)
         self.analysis_frame.pack(side="right")
@@ -86,13 +85,13 @@ class UI:
 
     def create_file_name_label(self):
         # text indicating the currently loaded file
-        self.file_name_label = tk.Label(
+        self.file_name_label = Label(
             self.sidebar_frame, text=self.fh.file_name)
         self.file_name_label.pack(pady=20, side="top")
 
     def create_file_dnd_field(self):
         # the field you can drop files into
-        self.dnd_field = tk.Label(self.sidebar_frame)
+        self.dnd_field = Label(self.sidebar_frame)
         self.dnd_field.configure(
             image=self.dnd_field_image, width=click_field_width, height=click_field_width, borderwidth=0)
         self.dnd_field.pack(pady=20, side="top")
@@ -107,44 +106,43 @@ class UI:
 
     def create_buttons(self):
         # button to browse the file explorer
-        file_upload_button = tk.Button(self.sidebar_frame)
+        file_upload_button = Button(self.sidebar_frame)
         file_upload_button.configure(
             image=self.browse_files_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         file_upload_button.pack(pady=20, side="top")
         file_upload_button.configure(command=self.fh.open_file_by_explorer)
 
         # button to configure the analysis
-        analysis_menu_button = tk.Button(self.sidebar_frame)
+        analysis_menu_button = Button(self.sidebar_frame)
         analysis_menu_button.configure(
             image=self.analysis_menu_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         analysis_menu_button.pack(pady=20, side="top")
 
         # button to save the results
-        save_result_button = tk.Button(self.sidebar_frame)
+        save_result_button = Button(self.sidebar_frame)
         save_result_button.configure(
             image=self.save_results_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         save_result_button.pack(pady=20, side="top")
 
         # frame for the data overview and the run button
-        run_frame = tk.Frame(self.analysis_frame)
+        run_frame = Frame(self.analysis_frame)
         run_frame.configure(width=200, height=200, bg=main_bg_color)
         run_frame.pack(side="top")
 
         # button to run the data overview
-        self.overview_button = tk.Button(run_frame)
+        self.overview_button = Button(run_frame)
         self.overview_button.configure(
             image=self.overview_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         self.overview_button.pack(padx=10, pady=10, side="left")
 
         # button to run the full analysis
-        self.run_button = tk.Button(run_frame)
+        self.run_button = Button(run_frame)
         self.run_button.configure(
             image=self.run_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
-        self.run_button.configure(command=self.clickRun)
         self.run_button.pack(padx=10, pady=10, side="left")
 
     def place_images(self):
-        bottom_bar = tk.Frame(self.sidebar_frame)
+        bottom_bar = Frame(self.sidebar_frame)
         bottom_bar.configure(width=sidebar_width,
                              height=bottombar_height, bg=visualization_bg_color)
         bottom_bar.pack(side="bottom")
@@ -173,23 +171,10 @@ class UI:
         panel.pack(padx=5, side="right")
 
     def create_visualization_canvas(self):
-        self.canvas2 = tk.Canvas(self.analysis_frame)
-        self.canvas2.configure(width=500, height=200,
-                               bg=visualization_bg_color)
-        self.canvas2.pack(side="bottom")
-        self.canvas2.update()
-        coord = 10, 10, self.canvas2.winfo_width(), self.canvas2.winfo_height()
-        self.arc1 = self.canvas2.create_arc(
-            coord, start=0, extent=150, fill="red")
-        self.arc2 = self.canvas2.create_arc(
-            coord, start=150, extent=215, fill="green")
-        self.canvas2.pack(fill=BOTH, expand=TRUE)
-
-    def resize_arc(canvas, arc, coord):
-        canvas.coords(arc, coord)
-
-    def clickRun(self):
-        self.canvas2.delete(self.arc1)
+        self.vis_canvas = Canvas(self.analysis_frame)
+        self.vis_canvas.configure(width=500, height=200,
+                                  bg=visualization_bg_color)
+        self.vis_canvas.pack(side="bottom", fill=BOTH, expand=TRUE)
 
     def updateUI(self):
         """
