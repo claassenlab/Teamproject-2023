@@ -4,6 +4,7 @@ import PIL.Image
 from ui.colors import Colors
 import data.file_handler as fh
 from tkinterdnd2 import *
+import ui.tooltip as tooltip
 
 main_bg_color = Colors.ukt_black
 sidebar_color = Colors.ukt_black
@@ -87,14 +88,14 @@ class UI:
         # text indicating the currently loaded file
         self.file_name_label = Label(
             self.sidebar_frame, text=self.fh.file_name)
-        self.file_name_label.pack(pady=20, side="top")
+        self.file_name_label.pack(pady=30, side="top")
 
     def create_file_dnd_field(self):
         # the field you can drop files into
         self.dnd_field = Label(self.sidebar_frame)
         self.dnd_field.configure(
             image=self.dnd_field_image, width=click_field_width, height=click_field_width, borderwidth=0)
-        self.dnd_field.pack(pady=20, side="top")
+        self.dnd_field.pack(pady=10, side="top")
         self.dnd_field.pack_propagate(False)
         self.dnd_field.drop_target_register(DND_FILES)
         self.dnd_field.dnd_bind("<<Drop>>", self.drop)
@@ -183,3 +184,4 @@ class UI:
 
         # update the file name label
         self.file_name_label.config(text=self.fh.file_name)
+        tooltip.CreateToolTip(self.file_name_label, text=self.fh.file_path)

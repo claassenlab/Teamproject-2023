@@ -18,6 +18,7 @@ class FileHandler:
     """
 
     def __init__(self, ui):
+        self.file_path = None
         self.file_data: TextIOWrapper = None
         self.file_name: str = "No file opened!"
         self.ui = ui
@@ -37,6 +38,8 @@ class FileHandler:
         # if the user cancelled
         if len(file_path) == 0:
             return
+
+        self.file_path = file_path
 
         # save the data and the last part of the file name
         self.file_data = open(file_path)
@@ -78,6 +81,7 @@ class FileHandler:
             t = t[1][1:len(t[1])]
 
             if t == file_extension:
+                self.file_path = file_path
                 self.file_name = os.path.basename(file_path)
                 self.ui.updateUI()
                 return
