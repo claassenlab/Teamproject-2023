@@ -70,6 +70,8 @@ class UI:
             file="ui/images/buttons/analysis_menu_button_image.png", width=button_width, height=button_height)
         self.save_results_button_image = PhotoImage(
             file="ui/images/buttons/save_results_button_image.png", width=button_width, height=button_height)
+        self.overview_button_image = PhotoImage(
+            file="ui/images/buttons/overview_button_image.png", width=button_width, height=button_height)
         self.run_button_image = PhotoImage(
             file="ui/images/buttons/run_button_image.png", width=button_width, height=button_height)
 
@@ -123,15 +125,23 @@ class UI:
             image=self.save_results_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
         save_result_button.pack(pady=20, side="top")
 
-        # button to run the analysis
+        # frame for the data overview and the run button
         run_frame = tk.Frame(self.analysis_frame)
         run_frame.configure(width=200, height=200, bg=main_bg_color)
-        self.runbutton = tk.Button(run_frame)
-        self.runbutton.configure(
-            image=self.run_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
-        self.runbutton.configure(command=self.clickRun)
-        self.runbutton.pack(padx=10, pady=10, side="right")
         run_frame.pack(side="top")
+
+        # button to run the data overview
+        self.overview_button = tk.Button(run_frame)
+        self.overview_button.configure(
+            image=self.overview_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
+        self.overview_button.pack(padx=10, pady=10, side="left")
+
+        # button to run the full analysis
+        self.run_button = tk.Button(run_frame)
+        self.run_button.configure(
+            image=self.run_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
+        self.run_button.configure(command=self.clickRun)
+        self.run_button.pack(padx=10, pady=10, side="left")
 
     def place_images(self):
         bottom_bar = tk.Frame(self.sidebar_frame)
