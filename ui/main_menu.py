@@ -5,6 +5,7 @@ from ui.colors import Colors
 import data.file_handler as fh
 from tkinterdnd2 import *
 import ui.tooltip as tooltip
+from data.analysis import Analysis
 
 main_bg_color = Colors.ukt_black
 sidebar_color = Colors.ukt_black
@@ -24,6 +25,7 @@ click_field_height = 50
 button_width = 208
 click_field_width = 200
 min_window_dimensions = "1200x700"
+data_overview_font_size = 15
 
 
 class UI:
@@ -32,6 +34,9 @@ class UI:
         # add file handler
         self.fh = fh.FileHandler(self)
         self.file_name = self.fh.file_name
+
+        # add analysis object
+        self.analysis = Analysis()
 
         # top UI level widget
         top_level = TkinterDnD.Tk()
@@ -74,6 +79,8 @@ class UI:
             file="ui/images/buttons/overview_button_image.png", width=button_width, height=button_height)
         self.run_button_image = PhotoImage(
             file="ui/images/buttons/run_button_image.png", width=button_width, height=button_height)
+
+        self.data_overview_label = None
 
         # create the UI elements
         self.create_file_name_label()
@@ -134,6 +141,7 @@ class UI:
         self.overview_button = Button(run_frame)
         self.overview_button.configure(
             image=self.overview_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
+        self.overview_button.configure(command=self.data_overview)
         self.overview_button.pack(padx=10, pady=10, side="left")
 
         # button to run the full analysis
@@ -177,11 +185,30 @@ class UI:
                                   bg=visualization_bg_color)
         self.vis_canvas.pack(side="bottom", fill=BOTH, expand=TRUE)
 
+    def data_overview(self):
+        """When the data overview button has been pressed."""
+
+        do_string = self.analysis.data_overview(self.fh)
+
+        # if there is no data, do nothing
+        if do_string == None:
+            return
+
+        # destroy the potential old label first
+        if self.data_overview_label:
+            self.data_overview_label.destroy()
+
+        # add the data_overview_label
+        self.data_overview_label = Label(self.vis_canvas)
+        self.data_overview_label.configure(
+            text=do_string, font=("Calibri", data_overview_font_size), anchor=W, justify=LEFT)
+        self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
+
     def updateUI(self):
         """
         This method is called after any event that should cause a UI change
         """
 
-        # update the file name label
+        # update the file name label and the tooltip
         self.file_name_label.config(text=self.fh.file_name)
         tooltip.CreateToolTip(self.file_name_label, text=self.fh.file_path)
