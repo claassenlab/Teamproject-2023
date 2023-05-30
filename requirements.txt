@@ -4,3 +4,4 @@ tk
 Pillow
 tkinterdnd2
 scanpy
+loompy
