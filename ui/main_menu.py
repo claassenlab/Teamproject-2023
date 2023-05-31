@@ -11,6 +11,8 @@ main_bg_color = Colors.ukt_black
 sidebar_color = Colors.ukt_black
 visualization_bg_color = Colors.ukt_blue_dark_1
 main_button_color = Colors.ukt_gold
+default_label_color = Colors.ukt_white
+default_font_color = Colors.ukt_black
 
 sidebar_width = 300
 bottombar_height = 100
@@ -94,7 +96,9 @@ class UI:
     def create_file_name_label(self):
         # text indicating the currently loaded file
         self.file_name_label = Label(
-            self.sidebar_frame, text=self.fh.file_name)
+            self.sidebar_frame)
+        self.file_name_label.configure(
+            text=self.fh.file_name, bg=default_label_color, fg=default_font_color)
         self.file_name_label.pack(pady=30, side="top")
 
     def create_file_dnd_field(self):
@@ -201,7 +205,8 @@ class UI:
         # add the data_overview_label
         self.data_overview_label = Label(self.vis_canvas)
         self.data_overview_label.configure(
-            text=do_string, font=("Calibri", data_overview_font_size), anchor=W, justify=LEFT)
+            bg=default_label_color, text=do_string, font=(
+                "Calibri", data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
         self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
 
     def updateUI(self):
