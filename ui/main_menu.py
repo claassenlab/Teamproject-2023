@@ -206,19 +206,19 @@ class UI:
         # the frame that appears right after clicking the button
         self.do_pre_window = Frame(self.vis_canvas)
         self.do_pre_window.configure(
-            width=do_pre_window_w, height=do_pre_window_h)
+            bg=default_label_color, width=do_pre_window_w, height=do_pre_window_h)
         self.do_pre_window.pack_propagate(False)
 
         # the label showing the info text
         do_pre_window_label = Label(self.do_pre_window)
         do_pre_window_label.configure(
-            text=do_pre_window_text, font=(standard_font, do_pre_window_font_size), pady=10)
+            bg=default_label_color, fg=default_font_color, text=do_pre_window_text, font=(standard_font, do_pre_window_font_size), pady=10)
         do_pre_window_label.pack()
 
         # the text input field
         text_input_field = Text(self.do_pre_window)
         text_input_field.configure(height=1, width=30, font=(
-            standard_font, do_pre_window_font_size))
+            standard_font, do_pre_window_font_size), bg=default_label_color, fg=default_font_color)
         text_input_field.pack()
 
         self.do_pre_window.place(relx=0.5, rely=0.5, anchor=CENTER)
