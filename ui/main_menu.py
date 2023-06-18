@@ -91,6 +91,7 @@ class UI:
             file="ui/images/buttons/run_button_image.png", width=button_width, height=button_height)
 
         self.data_overview_label = None
+        self.analysis_menu_window = None
 
         # create the UI elements
         self.create_file_name_label()
@@ -210,6 +211,10 @@ class UI:
         Creates a new window used to specify the analysis.
         Extend this whenever you add a new analysis functionality.
         """
+
+        # prevents opening the window multiple times
+        if self.analysis_menu_window:
+            self.analysis_menu_window.destroy()
 
         self.analysis_menu_window = Toplevel(self.mainwindow)
         self.analysis_menu_window.title("Specify analysis")
