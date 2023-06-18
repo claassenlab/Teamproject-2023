@@ -72,3 +72,22 @@ class Analysis:
         output += "Number of genes: " + str(n_genes)
 
         return output
+
+    def umap(self, fh: FileHandler, col: str):
+        """
+        Creates the UMAP projections.
+        """
+
+        self.update(fh)
+
+        if self.no_data():
+            return
+
+        # not the loaded file for now due to the lack of usable example loom files
+        adata = sc.datasets.pbmc68k_reduced()
+        if col == "default":
+            sc.pl.umap(adata)
+        else:
+            sc.pl.umap(adata, color=col)
+        # TODO: Replace adata with self.adata to take the loaded loom file
+        # when there are useful loom files to test with

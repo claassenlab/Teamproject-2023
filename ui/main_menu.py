@@ -13,6 +13,9 @@ visualization_bg_color = Colors.ukt_blue_dark_1
 main_button_color = Colors.ukt_gold
 default_label_color = Colors.ukt_white
 default_font_color = Colors.ukt_black
+analysis_menu_bg_color = Colors.ukt_black
+analysis_menu_button_color = Colors.ukt_white
+analysis_menu_text_color = Colors.ukt_black
 
 sidebar_width = 300
 bottombar_height = 100
@@ -28,6 +31,11 @@ button_width = 208
 click_field_width = 200
 min_window_dimensions = "1200x700"
 data_overview_font_size = 15
+analysis_menu_x_offset = 140
+analysis_menu_width = 1000
+analysis_menu_height = 600
+analysis_menu_font = ("Calibri", 15)
+analysis_menu_section_height = 40
 
 
 class UI:
@@ -128,6 +136,7 @@ class UI:
         analysis_menu_button = Button(self.sidebar_frame)
         analysis_menu_button.configure(
             image=self.analysis_menu_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
+        analysis_menu_button.configure(command=self.analysis_menu)
         analysis_menu_button.pack(pady=20, side="top")
 
         # button to save the results
@@ -152,7 +161,14 @@ class UI:
         self.run_button = Button(run_frame)
         self.run_button.configure(
             image=self.run_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
+        self.run_button.configure(command=self.run_analysis)
         self.run_button.pack(padx=10, pady=10, side="left")
+
+        # analysis menu variables that indicate what options the user chose
+        # UMAP
+        self.umap_check = IntVar()
+        self.umap_color_var = StringVar()
+        self.umap_color_var.set("default")
 
     def place_images(self):
         bottom_bar = Frame(self.sidebar_frame)
@@ -189,6 +205,66 @@ class UI:
                                   bg=visualization_bg_color)
         self.vis_canvas.pack(side="bottom", fill=BOTH, expand=TRUE)
 
+    def analysis_menu(self):
+        """
+        Creates a new window used to specify the analysis.
+        Extend this whenever you add a new analysis functionality.
+        """
+
+        self.analysis_menu_window = Toplevel(self.mainwindow)
+        self.analysis_menu_window.title("Specify analysis")
+
+        ws = self.analysis_menu_window.winfo_screenwidth()  # width of the screen
+        hs = self.analysis_menu_window.winfo_screenheight()  # height of the screen
+
+        # calculate x and y coordinates for the window
+        x = (ws/2) - (analysis_menu_width/2) + analysis_menu_x_offset
+        y = (hs/2) - (analysis_menu_height/2)
+
+        self.analysis_menu_window.geometry(
+            '%dx%d+%d+%d' % (analysis_menu_width, analysis_menu_height, x, y))
+        self.analysis_menu_window.configure(
+            width=analysis_menu_width, height=analysis_menu_height, bg=analysis_menu_bg_color)
+        self.analysis_menu_window.resizable(False, False)
+
+        self.umap_section()
+
+        # TODO: extend
+
+    def umap_section(self):
+        """
+        The UMAP section of the analysis menu.
+        """
+
+        umap_frame = Frame(self.analysis_menu_window)
+        umap_frame.configure(
+            width=analysis_menu_width - 20, height=analysis_menu_section_height, bg=default_label_color)
+        umap_frame.pack_propagate(False)
+
+        umap_checkbutton = Checkbutton(umap_frame)
+        umap_checkbutton.configure(
+            text="UMAP", font=analysis_menu_font, bg=analysis_menu_button_color,
+            fg=analysis_menu_text_color, padx=10, variable=self.umap_check)
+
+        self.umap_color_button = Menubutton(umap_frame)
+        self.umap_color_button.configure(
+            text="Choose color", font=analysis_menu_font)
+        umap_menu = Menu(self.umap_color_button)
+
+        umap_menu.add_radiobutton(
+            label="Default", variable=self.umap_color_var, value="default")
+        umap_menu.add_radiobutton(
+            label="Louvain", variable=self.umap_color_var, value="louvain")
+        umap_menu.add_radiobutton(
+            label="HES4", variable=self.umap_color_var, value="HES4")
+        umap_menu.add_radiobutton(
+            label="TNFRSF4", variable=self.umap_color_var, value="TNFRSF4")
+
+        self.umap_color_button.configure(menu=umap_menu)
+        umap_checkbutton.pack(side=LEFT)
+        self.umap_color_button.pack(side=LEFT, padx=30)
+        umap_frame.pack(side=TOP, pady=10)
+
     def data_overview(self):
         """When the data overview button has been pressed."""
 
@@ -208,6 +284,15 @@ class UI:
             bg=default_label_color, text=do_string, font=(
                 "Calibri", data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
         self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
+
+    def run_analysis(self):
+        """
+        Manages the analysis when the user presses the "Run Analysis" button.
+        """
+
+        # for now we only want a simple UMAP projection if the option was enabled
+        if self.umap_check.get():
+            self.analysis.umap(self.fh, self.umap_color_var.get())
 
     def updateUI(self):
         """
