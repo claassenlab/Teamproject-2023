@@ -28,6 +28,11 @@ button_width = 208
 click_field_width = 200
 min_window_dimensions = "1200x700"
 data_overview_font_size = 15
+do_pre_window_text = "Enter the name of the text file to be created.\nLeave blank to not create one."
+do_pre_window_w = 400
+do_pre_window_h = 120
+do_pre_window_font_size = 15
+standard_font = "Calibri"
 
 
 class UI:
@@ -83,6 +88,10 @@ class UI:
             file="ui/images/buttons/run_button_image.png", width=button_width, height=button_height)
 
         self.data_overview_label = None
+        self.loading_label = None
+
+        self.loading_image = PhotoImage(
+            file="ui/images/panels/loading_panel.png")
 
         # create the UI elements
         self.create_file_name_label()
@@ -145,7 +154,7 @@ class UI:
         self.overview_button = Button(run_frame)
         self.overview_button.configure(
             image=self.overview_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
-        self.overview_button.configure(command=self.data_overview)
+        self.overview_button.configure(command=self.data_overview_window)
         self.overview_button.pack(padx=10, pady=10, side="left")
 
         # button to run the full analysis
@@ -189,10 +198,43 @@ class UI:
                                   bg=visualization_bg_color)
         self.vis_canvas.pack(side="bottom", fill=BOTH, expand=TRUE)
 
-    def data_overview(self):
+    def data_overview_window(self):
         """When the data overview button has been pressed."""
 
+        self.enable_loading_panel()
+
+        # the frame that appears right after clicking the button
+        self.do_pre_window = Frame(self.vis_canvas)
+        self.do_pre_window.configure(
+            width=do_pre_window_w, height=do_pre_window_h)
+        self.do_pre_window.pack_propagate(False)
+
+        # the label showing the info text
+        do_pre_window_label = Label(self.do_pre_window)
+        do_pre_window_label.configure(
+            text=do_pre_window_text, font=(standard_font, do_pre_window_font_size), pady=10)
+        do_pre_window_label.pack()
+
+        # the text input field
+        text_input_field = Text(self.do_pre_window)
+        text_input_field.configure(height=1, width=30, font=(
+            standard_font, do_pre_window_font_size))
+        text_input_field.pack()
+
+        self.do_pre_window.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+        # focus the text input field right away
+        text_input_field.focus_set()
+
+        # enter starts the data overview with the current text input
+        text_input_field.bind('<Return>', lambda event: self.data_overview(
+            event, text_input_field.get("1.0", "end")))
+
+    def data_overview(self, event, text_file_name: str):
         do_string = self.analysis.data_overview(self.fh)
+
+        self.disable_loading_panel()
+        self.do_pre_window.destroy()
 
         # if there is no data, do nothing
         if do_string == None:
@@ -206,8 +248,26 @@ class UI:
         self.data_overview_label = Label(self.vis_canvas)
         self.data_overview_label.configure(
             bg=default_label_color, text=do_string, font=(
-                "Calibri", data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
+                standard_font, data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
         self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
+
+        # write the data overview to a text file with the given name
+        # we have to delete the last two characters (\n) first
+        last_index = len(text_file_name) - 1
+        text_file_name = text_file_name[0:last_index]
+        # only if input string was not empty
+        if len(text_file_name) > 0:
+            self.fh.write_data_overview_to_file(
+                text_file_name, do_string)
+
+    def enable_loading_panel(self):
+        self.loading_label = Label(self.vis_canvas)
+        self.loading_label.configure(image=self.loading_image)
+        self.loading_label.place(relx=0.5, rely=0.1, anchor=CENTER)
+
+    def disable_loading_panel(self):
+        if self.loading_label:
+            self.loading_label.destroy()
 
     def updateUI(self):
         """
