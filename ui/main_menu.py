@@ -331,7 +331,7 @@ class UI:
             bg=default_label_color, text=do_string, font=(
                 standard_font, data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
         self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
-        
+
         # write the data overview to a text file with the given name
         # we have to delete the last two characters (\n) first
         last_index = len(text_file_name) - 1
