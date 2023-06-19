@@ -32,6 +32,10 @@ class FileHandler:
         self.file_name: str = "Only .loom files for now!"
         # self.file_name: str = "No file opened!"
 
+    def no_file(self):
+        """Whether there is a file loaded right now."""
+        return self.file_path == None
+
     def open_file_by_explorer(self):
         """
         Opens the file explorer and lets the user select a file.

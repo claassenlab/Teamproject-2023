@@ -89,7 +89,4 @@ class Analysis:
         if col == "default":
             sc.pl.umap(self.adata)
         else:
-            # Our example file does not work for colors other than default
-            # so let us take a working dataset for demonstrational purposes
-            adata = sc.datasets.pbmc68k_reduced()
-            sc.pl.umap(adata, color=col)
+            sc.pl.umap(self.adata, color=col)
