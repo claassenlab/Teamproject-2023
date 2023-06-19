@@ -154,5 +154,6 @@ class FileHandler:
         """
 
         f = open("user/data_overview/" + file_name + ".txt", "w")
-        f.write(do)
+        # write the full file path to the text file as well
+        f.write("File: " + self.file_path + "\n\n" + do)
         f.close()
