@@ -52,10 +52,10 @@ no_analysis_selected_title = "No analysis selected!"
 no_analysis_selected_message = "You have not selected an analysis option!\nTo do this, open the analysis menu!"
 data_overview_error_type = "error"
 data_overview_error_title = "Data overview error!"
-data_overview_error_message = "An error occurred while parsing your file!\nPlease check if the file is valid."
+data_overview_error_message = "An error occurred while performing the data overview!\nPlease check if the file and the name you entered are valid!"
 umap_error_type = "error"
 umap_error_title = "UMAP error!"
-umap_error_message = "The UMAP projection could not be created!\nPlease check if your file and the selected UMAP options are valid!"
+umap_error_message = "The UMAP projection could not be created!\nPlease check if your file and the\nselected UMAP options are valid!"
 
 
 class UI:
@@ -365,6 +365,7 @@ class UI:
         except:
             self.show_message(data_overview_error_type,
                               data_overview_error_title, data_overview_error_message)
+            self.disable_loading_panel()
 
     def run_analysis(self):
         """

@@ -1,4 +1,4 @@
-File: D:/Finn der Zocker/Documents/Teamprojekt-Repo/Teamproject-2023/neuron_labeling.loom
+File: D:/Finn der Zocker/Documents/Teamprojekt-Repo/Teamproject-2023/examples/neuron_labeling.loom
 
 Dataset overview:
 ----------------------------------------
