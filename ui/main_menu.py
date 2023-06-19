@@ -282,8 +282,6 @@ class UI:
     def data_overview_window(self):
         """When the data overview button has been pressed."""
 
-        self.enable_loading_panel()
-
         # the frame that appears right after clicking the button
         self.do_pre_window = Frame(self.vis_canvas)
         self.do_pre_window.configure(
@@ -312,10 +310,16 @@ class UI:
             event, text_input_field.get("1.0", "end")))
 
     def data_overview(self, event, text_file_name: str):
+        """
+        Performs the data overview.
+        """
+
+        self.do_pre_window.destroy()
+        self.enable_loading_panel()
+
         do_string = self.analysis.data_overview(self.fh)
 
         self.disable_loading_panel()
-        self.do_pre_window.destroy()
 
         # if there is no data, do nothing
         if do_string == None:
@@ -346,18 +350,25 @@ class UI:
         Manages the analysis when the user presses the "Run Analysis" button.
         """
 
+        self.enable_loading_panel()
+
         # for now we only want a simple UMAP projection if the option was enabled
         if self.umap_check.get():
             self.analysis.umap(self.fh, self.umap_color_var.get())
 
+        self.disable_loading_panel()
+
     def enable_loading_panel(self):
         self.loading_label = Label(self.vis_canvas)
         self.loading_label.configure(image=self.loading_image)
-        self.loading_label.place(relx=0.5, rely=0.1, anchor=CENTER)
+        self.loading_label.place(relx=0.5, rely=0.5, anchor=CENTER)
+        # important to ensure the update of the UI before the "heavy" methods
+        self.mainwindow.update()
 
     def disable_loading_panel(self):
         if self.loading_label:
             self.loading_label.destroy()
+            self.mainwindow.update()
 
     def updateUI(self):
         """
