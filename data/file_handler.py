@@ -138,3 +138,17 @@ class FileHandler:
 
         # return None if there is no currently loaded file
         return None
+
+    def write_data_overview_to_file(self, file_name: str, do: str):
+        """
+        Writes the data overview string to a text file with the given name.
+        Location: user/data_overview
+
+        Args:
+            file_name (str): The name of the file to be created (without .txt)
+            do (str): The full, multi-line data overview string
+        """
+
+        f = open("user/data_overview/" + file_name + ".txt", "w")
+        f.write(do)
+        f.close()
