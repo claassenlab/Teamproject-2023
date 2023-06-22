@@ -1,4 +1,5 @@
 from tkinter import *
+import tkinter.messagebox as messagebox
 from PIL import ImageTk
 import PIL.Image
 from ui.colors import Colors
@@ -41,6 +42,20 @@ analysis_menu_width = 1000
 analysis_menu_height = 600
 analysis_menu_font = ("Calibri", 15)
 analysis_menu_section_height = 40
+
+# error messages
+no_file_message_type = "warning"
+no_file_title = "No file loaded!"
+no_file_message = "A file must be loaded for this! Please load a file and try again!"
+no_analysis_selected_type = "warning"
+no_analysis_selected_title = "No analysis selected!"
+no_analysis_selected_message = "You have not selected an analysis option!\nTo do this, open the analysis menu!"
+data_overview_error_type = "error"
+data_overview_error_title = "Data overview error!"
+data_overview_error_message = "An error occurred while performing the data overview!\nPlease check if the file and the name you entered are valid!"
+umap_error_type = "error"
+umap_error_title = "UMAP error!"
+umap_error_message = "The UMAP projection could not be created!\nPlease check if your file and the\nselected UMAP options are valid!"
 
 
 class UI:
@@ -261,28 +276,41 @@ class UI:
             fg=analysis_menu_text_color, padx=10, variable=self.umap_check)
 
         self.umap_color_button = Menubutton(umap_frame)
-        self.umap_color_button.configure(
-            text="Choose color", font=analysis_menu_font)
         umap_menu = Menu(self.umap_color_button)
-
-        umap_menu.add_radiobutton(
-            label="Default", variable=self.umap_color_var, value="default")
-        umap_menu.add_radiobutton(
-            label="Louvain", variable=self.umap_color_var, value="louvain")
-        umap_menu.add_radiobutton(
-            label="HES4", variable=self.umap_color_var, value="HES4")
-        umap_menu.add_radiobutton(
-            label="TNFRSF4", variable=self.umap_color_var, value="TNFRSF4")
-
         self.umap_color_button.configure(menu=umap_menu)
+
+        umap_menu.add_radiobutton(
+            label="Default", variable=self.umap_color_var, value="default", command=self.update_umap_buttons)
+        umap_menu.add_radiobutton(
+            label="Louvain", variable=self.umap_color_var, value="louvain", command=self.update_umap_buttons)
+        umap_menu.add_radiobutton(
+            label="HES4", variable=self.umap_color_var, value="HES4", command=self.update_umap_buttons)
+        umap_menu.add_radiobutton(
+            label="TNFRSF4", variable=self.umap_color_var, value="TNFRSF4", command=self.update_umap_buttons)
+
+        self.update_umap_buttons()
+
         umap_checkbutton.pack(side=LEFT)
         self.umap_color_button.pack(side=LEFT, padx=30)
         umap_frame.pack(side=TOP, pady=10)
 
+    def update_umap_buttons(self):
+        """
+        Updates the menu buttons in the UMAP section of the analysis menu so that they show the selected option.
+        """
+        self.umap_color_button.configure(
+            text="color = " + self.umap_color_var.get(), font=analysis_menu_font)
+
+        self.mainwindow.update()
+
     def data_overview_window(self):
         """When the data overview button has been pressed."""
 
-        self.enable_loading_panel()
+        # if there is no file loaded, notify the user and return
+        if self.fh.no_file():
+            self.show_message(no_file_message_type,
+                              no_file_title, no_file_message)
+            return
 
         # the frame that appears right after clicking the button
         self.do_pre_window = Frame(self.vis_canvas)
@@ -312,52 +340,102 @@ class UI:
             event, text_input_field.get("1.0", "end")))
 
     def data_overview(self, event, text_file_name: str):
-        do_string = self.analysis.data_overview(self.fh)
+        """
+        Performs the data overview.
+        """
 
-        self.disable_loading_panel()
-        self.do_pre_window.destroy()
+        try:
+            self.do_pre_window.destroy()
+            self.enable_loading_panel()
 
-        # if there is no data, do nothing
-        if do_string == None:
-            return
+            do_string = self.analysis.data_overview(self.fh)
 
-        # destroy the potential old label first
-        if self.data_overview_label:
-            self.data_overview_label.destroy()
+            self.disable_loading_panel()
 
-        # add the data_overview_label
-        self.data_overview_label = Label(self.vis_canvas)
-        self.data_overview_label.configure(
-            bg=default_label_color, text=do_string, font=(
-                standard_font, data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
-        self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
-        
-        # write the data overview to a text file with the given name
-        # we have to delete the last two characters (\n) first
-        last_index = len(text_file_name) - 1
-        text_file_name = text_file_name[0:last_index]
-        # only if input string was not empty
-        if len(text_file_name) > 0:
-            self.fh.write_data_overview_to_file(
-                text_file_name, do_string)
+            # destroy the potential old label first
+            if self.data_overview_label:
+                self.data_overview_label.destroy()
+
+            # add the data_overview_label
+            self.data_overview_label = Label(self.vis_canvas)
+            self.data_overview_label.configure(
+                bg=default_label_color, text=do_string, font=(
+                    standard_font, data_overview_font_size), fg=default_font_color, anchor=W, justify=LEFT)
+            self.data_overview_label.pack(padx=10, pady=10, anchor=NW)
+
+            # write the data overview to a text file with the given name
+            # we have to delete the last two characters (\n) first
+            last_index = len(text_file_name) - 1
+            text_file_name = text_file_name[0:last_index]
+            # only if input string was not empty
+            if len(text_file_name) > 0:
+                self.fh.write_data_overview_to_file(
+                    text_file_name, do_string)
+        except:
+            self.show_message(data_overview_error_type,
+                              data_overview_error_title, data_overview_error_message)
+            self.disable_loading_panel()
 
     def run_analysis(self):
         """
         Manages the analysis when the user presses the "Run Analysis" button.
         """
 
+        # if there is no file loaded, notify the user and return
+        if self.fh.no_file():
+            self.show_message(no_file_message_type,
+                              no_file_title, no_file_message)
+            return
+
+        # manually check if there is at least one analysis option selected
+        do_umap = self.umap_check.get()
+        if not do_umap:  # and not everything else in the future
+            self.show_message(no_analysis_selected_type,
+                              no_analysis_selected_title, no_analysis_selected_message)
+            return
+
+        self.enable_loading_panel()
+
         # for now we only want a simple UMAP projection if the option was enabled
-        if self.umap_check.get():
-            self.analysis.umap(self.fh, self.umap_color_var.get())
+        try:
+            if do_umap:
+                self.analysis.umap(self.fh, self.umap_color_var.get())
+        except:
+            self.show_message(
+                umap_error_type, umap_error_title, umap_error_message)
+            self.disable_loading_panel()
+            return
+
+        self.disable_loading_panel()
 
     def enable_loading_panel(self):
         self.loading_label = Label(self.vis_canvas)
         self.loading_label.configure(image=self.loading_image)
-        self.loading_label.place(relx=0.5, rely=0.1, anchor=CENTER)
+        self.loading_label.place(relx=0.5, rely=0.5, anchor=CENTER)
+        # important to ensure the update of the UI before the "heavy" methods
+        self.mainwindow.update()
 
     def disable_loading_panel(self):
         if self.loading_label:
             self.loading_label.destroy()
+            self.mainwindow.update()
+
+    def show_message(self, type: str, title: str, message: str):
+        """
+        Creates a messagebox used for error messages.
+
+        Args:
+            type (str): "info", "warning" or "error"
+            title (str): The title for the messagebox.
+            message (str): The message to show.
+        """
+
+        if type == "warning":
+            messagebox.showwarning(title, message)
+        elif type == "error":
+            messagebox.showerror(title, message)
+        else:
+            messagebox.showinfo(title, message)
 
     def updateUI(self):
         """

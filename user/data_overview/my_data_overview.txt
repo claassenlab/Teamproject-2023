@@ -1,4 +1,6 @@
+File: D:/Finn der Zocker/Documents/Teamprojekt-Repo/Teamproject-2023/examples/neuron_labeling.loom
+
 Dataset overview:
 ----------------------------------------
-Number of cells: 200
-Number of genes: 20
+Number of cells: 3060
+Number of genes: 97

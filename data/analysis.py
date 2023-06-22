@@ -83,11 +83,10 @@ class Analysis:
         if self.no_data():
             return
 
-        # not the loaded file for now due to the lack of usable example loom files
-        adata = sc.datasets.pbmc68k_reduced()
+        # create the UMAP projection from the loaded and converted file
+        sc.pp.neighbors(self.adata)
+        sc.tl.umap(self.adata)
         if col == "default":
-            sc.pl.umap(adata)
+            sc.pl.umap(self.adata)
         else:
-            sc.pl.umap(adata, color=col)
-        # TODO: Replace adata with self.adata to take the loaded loom file
-        # when there are useful loom files to test with
+            sc.pl.umap(self.adata, color=col)
