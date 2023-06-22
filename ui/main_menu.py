@@ -276,23 +276,32 @@ class UI:
             fg=analysis_menu_text_color, padx=10, variable=self.umap_check)
 
         self.umap_color_button = Menubutton(umap_frame)
-        self.umap_color_button.configure(
-            text="Choose color", font=analysis_menu_font)
         umap_menu = Menu(self.umap_color_button)
-
-        umap_menu.add_radiobutton(
-            label="Default", variable=self.umap_color_var, value="default")
-        umap_menu.add_radiobutton(
-            label="Louvain", variable=self.umap_color_var, value="louvain")
-        umap_menu.add_radiobutton(
-            label="HES4", variable=self.umap_color_var, value="HES4")
-        umap_menu.add_radiobutton(
-            label="TNFRSF4", variable=self.umap_color_var, value="TNFRSF4")
-
         self.umap_color_button.configure(menu=umap_menu)
+
+        umap_menu.add_radiobutton(
+            label="Default", variable=self.umap_color_var, value="default", command=self.update_umap_buttons)
+        umap_menu.add_radiobutton(
+            label="Louvain", variable=self.umap_color_var, value="louvain", command=self.update_umap_buttons)
+        umap_menu.add_radiobutton(
+            label="HES4", variable=self.umap_color_var, value="HES4", command=self.update_umap_buttons)
+        umap_menu.add_radiobutton(
+            label="TNFRSF4", variable=self.umap_color_var, value="TNFRSF4", command=self.update_umap_buttons)
+
+        self.update_umap_buttons()
+
         umap_checkbutton.pack(side=LEFT)
         self.umap_color_button.pack(side=LEFT, padx=30)
         umap_frame.pack(side=TOP, pady=10)
+
+    def update_umap_buttons(self):
+        """
+        Updates the menu buttons in the UMAP section of the analysis menu so that they show the selected option.
+        """
+        self.umap_color_button.configure(
+            text="color = " + self.umap_color_var.get(), font=analysis_menu_font)
+
+        self.mainwindow.update()
 
     def data_overview_window(self):
         """When the data overview button has been pressed."""
