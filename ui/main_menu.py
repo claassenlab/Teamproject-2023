@@ -344,6 +344,10 @@ class UI:
         Performs the data overview.
         """
 
+        # destroy the potential old label first
+        if self.data_overview_label:
+            self.data_overview_label.destroy()
+
         try:
             self.do_pre_window.destroy()
             self.enable_loading_panel()
@@ -351,10 +355,6 @@ class UI:
             do_string = self.analysis.data_overview(self.fh)
 
             self.disable_loading_panel()
-
-            # destroy the potential old label first
-            if self.data_overview_label:
-                self.data_overview_label.destroy()
 
             # add the data_overview_label
             self.data_overview_label = Label(self.vis_canvas)
