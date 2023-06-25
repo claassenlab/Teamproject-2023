@@ -73,9 +73,6 @@ class Analysis:
         
         avg_non0_genes = total_non0_genes/n_cells
             
-        
-        # test = self.adata.X[1,1]
-
         output = ""
         output += "Dataset overview:" + "\n"
         output += "----------------------------------------------------------------------------------------------------------" + "\n"
