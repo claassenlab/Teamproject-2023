@@ -16,6 +16,7 @@ class Analysis:
         # no data yet
         self.file_path = None
         self.adata = None
+        self.avg_non_0_signal_genes = None
 
     def update(self, fh: FileHandler):
         """
@@ -36,6 +37,9 @@ class Analysis:
             self.adata = sc.read_loom(current_path)
             # and update the file path of this object
             self.file_path = current_path
+            return True
+        
+        return False
 
     def no_data(self):
         """Returns whether there is data to process."""
@@ -53,7 +57,7 @@ class Analysis:
             string: A multi-line string which the UI uses to display the information.
         """
 
-        self.update(fh)
+        maybe_upate = self.update(fh)
 
         # if there is no data
         if self.no_data():
@@ -65,20 +69,24 @@ class Analysis:
         # each column corresponds to a gene
         n_genes = self.adata.n_vars
 
-        # get the average amount of non-zero genes per cell by counting how many genes have a non-zero signal and dividing by the amount of cells.
-        total_non0_genes = 0
-        for i in range(n_cells):     
-            for j in range(n_genes): 
-                if(self.adata.X[i,j] != 0): total_non0_genes = (total_non0_genes + 1)
+        if (maybe_upate == True):
+            # get the average amount of non-zero genes per cell by counting how many genes have a non-zero signal and dividing by the amount of cells.
+            total_non_0_genes = 0
+            for i in range(n_cells):     
+                for j in range(n_genes): 
+                    if(self.adata.X[i,j] != 0): total_non_0_genes = (total_non_0_genes + 1)
         
-        avg_non0_genes = total_non0_genes/n_cells
+            avg_non_0_genes = total_non_0_genes/n_cells
+            # Save the calculated value as a parameter of the analysis.
+            self.avg_non_0_signal_genes = avg_non_0_genes
+
             
         output = ""
         output += "Dataset overview:" + "\n"
         output += "----------------------------------------------------------------------------------------------------------" + "\n"
         output += "Number of cells: " + str(n_cells) + "\n"
         output += "Number of genes: " + str(n_genes) + "\n"
-        output += "Average amount of non-zero signal genes: " + str(avg_non0_genes)
+        output += "Average amount of non-zero signal genes: " + str(self.avg_non_0_signal_genes)
 
         return output
 
@@ -87,7 +95,7 @@ class Analysis:
         Creates the UMAP projections.
         """
 
-        self.update(fh)
+        maybe_upate = self.update(fh)
 
         if self.no_data():
             return
