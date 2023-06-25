@@ -65,11 +65,23 @@ class Analysis:
         # each column corresponds to a gene
         n_genes = self.adata.n_vars
 
+        # get the average amount of non-zero genes per cell by counting how many genes have a non-zero signal and dividing by the amount of cells.
+        total_non0_genes = 0
+        for i in range(n_cells):     
+            for j in range(n_genes): 
+                if(self.adata.X[i,j] != 0): total_non0_genes = (total_non0_genes + 1)
+        
+        avg_non0_genes = total_non0_genes/n_cells
+            
+        
+        # test = self.adata.X[1,1]
+
         output = ""
         output += "Dataset overview:" + "\n"
-        output += "----------------------------------------" + "\n"
+        output += "----------------------------------------------------------------------------------------------------------" + "\n"
         output += "Number of cells: " + str(n_cells) + "\n"
-        output += "Number of genes: " + str(n_genes)
+        output += "Number of genes: " + str(n_genes) + "\n"
+        output += "Average amount of non-zero signal genes: " + str(avg_non0_genes)
 
         return output
 
