@@ -17,6 +17,10 @@ class Analysis:
         self.file_path = None
         self.adata = None
         self.avg_non_0_signal_genes = None
+        self.min_num_non_0_genes = None
+        self.min_cell_non_0_genes = None
+        self.max_num_non_0_genes = None
+        self.max_cell_non_0_genes = None
 
     def update(self, fh: FileHandler):
         """
@@ -74,16 +78,38 @@ class Analysis:
 
         # only do costly operations when there is an update required
         if (maybe_upate):
-            # get the average amount of non-zero genes per cell by counting how many genes have a non-zero signal and dividing by the amount of cells
+
             total_non_0_genes = 0
+
+            # get the cell with the minimum number of non-zero signal genes
+            self.min_num_non_0_genes = n_genes + 1
+            self.min_cell_non_0_genes = None
+
+            # get the cell with the maximum number of non-zero signal genes
+            self.max_num_non_0_genes = -1
+            self.max_cell_non_0_genes = None
+
             for i in range(n_cells):
+                # count the non-zero signal genes in the current cell
+                non_0_genes_cell = 0
                 for j in range(n_genes):
                     if (self.adata.X[i, j] != 0):
-                        total_non_0_genes += 1
+                        non_0_genes_cell += 1
 
-            avg_non_0_genes = total_non_0_genes/n_cells
-            # Save the calculated value as a parameter of the analysis.
-            self.avg_non_0_signal_genes = avg_non_0_genes
+                # check if the min/max cell needs to be updated
+                if non_0_genes_cell < self.min_num_non_0_genes:
+                    self.min_num_non_0_genes = non_0_genes_cell
+                    self.min_cell_non_0_genes = self.adata.obs_names[i]
+                if non_0_genes_cell > self.max_num_non_0_genes:
+                    self.max_num_non_0_genes = non_0_genes_cell
+                    self.max_cell_non_0_genes = self.adata.obs_names[i]
+
+                # update total non-zero signal genes count
+                total_non_0_genes += non_0_genes_cell
+
+            # get the average amount of non-zero genes per cell by counting how many
+            # genes have a non-zero signal and dividing by the amount of cells
+            self.avg_non_0_signal_genes = total_non_0_genes/n_cells
 
         output = ""
         output += "Dataset overview:" + "\n"
@@ -91,7 +117,13 @@ class Analysis:
         output += "Number of cells: " + str(n_cells) + "\n"
         output += "Number of genes: " + str(n_genes) + "\n"
         output += "Average amount of non-zero signal genes: " + \
-            str(self.avg_non_0_signal_genes)
+            str(self.avg_non_0_signal_genes) + "\n"
+        output += "Cell with fewest non-zero signal genes: " + \
+            str(self.min_cell_non_0_genes) + \
+            " (n=" + str(self.min_num_non_0_genes) + ")" + "\n"
+        output += "Cell with most non-zero signal genes: " + \
+            str(self.max_cell_non_0_genes) + \
+            " (n=" + str(self.max_num_non_0_genes) + ")"
 
         return output
 
