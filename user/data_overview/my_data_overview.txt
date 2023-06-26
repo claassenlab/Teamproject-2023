@@ -1,6 +1,9 @@
 File: D:/Finn der Zocker/Documents/Teamprojekt-Repo/Teamproject-2023/examples/neuron_labeling.loom
 
 Dataset overview:
-----------------------------------------
+----------------------------------------------------------------------------------------------------------
 Number of cells: 3060
 Number of genes: 97
+Average amount of non-zero signal genes: 57.59346405228758
+Cell with fewest non-zero signal genes: 527 (n=21)
+Cell with most non-zero signal genes: 580 (n=93)
