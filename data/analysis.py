@@ -120,10 +120,10 @@ class Analysis:
             str(self.avg_non_0_signal_genes) + "\n"
         output += "Cell with fewest non-zero signal genes: " + \
             str(self.min_cell_non_0_genes) + \
-            " (n=" + str(self.min_num_non_0_genes) + ")" + "\n"
+            " (" + str(self.min_num_non_0_genes) + " genes)" + "\n"
         output += "Cell with most non-zero signal genes: " + \
             str(self.max_cell_non_0_genes) + \
-            " (n=" + str(self.max_num_non_0_genes) + ")"
+            " (" + str(self.max_num_non_0_genes) + " genes)"
 
         return output
 
