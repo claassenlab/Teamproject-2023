@@ -5,3 +5,4 @@ Pillow
 tkinterdnd2
 scanpy
 loompy
+scvelo

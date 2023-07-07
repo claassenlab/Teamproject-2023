@@ -36,6 +36,10 @@ do_pre_window_text = "Enter the name of the text file to be created.\nLeave blan
 do_pre_window_w = 400
 do_pre_window_h = 120
 do_pre_window_font_size = 15
+ra_pre_window_text = "Enter the name of the text file to be created.\nThis file lists the genes that have been chosen for velocity analysis.\nLeave blank to not create one."
+ra_pre_window_w = 600
+ra_pre_window_h = 140
+ra_pre_window_font_size = 15
 standard_font = "Calibri"
 analysis_menu_x_offset = 140
 analysis_menu_width = 1000
@@ -56,6 +60,9 @@ data_overview_error_message = "An error occurred while performing the data overv
 umap_error_type = "error"
 umap_error_title = "UMAP error!"
 umap_error_message = "The UMAP projection could not be created!\nPlease check if your file and the\nselected UMAP options are valid!"
+preprocess_error_type = "error"
+preprocess_error_title = "Preprocessing error!"
+preprocess_error_message = "An error occured while trying to preprocess your data! Please check if the file and the name you entered are valid!"
 
 
 class UI:
@@ -186,7 +193,7 @@ class UI:
         self.run_button = Button(run_frame)
         self.run_button.configure(
             image=self.run_button_image, width=click_field_width, height=click_field_height, borderwidth=0)
-        self.run_button.configure(command=self.run_analysis)
+        self.run_button.configure(command=self.run_analysis_window)
         self.run_button.pack(padx=10, pady=10, side="left")
 
         # analysis menu variables that indicate what options the user chose
@@ -376,16 +383,48 @@ class UI:
                               data_overview_error_title, data_overview_error_message)
             self.disable_loading_panel()
 
-    def run_analysis(self):
-        """
-        Manages the analysis when the user presses the "Run Analysis" button.
-        """
+    def run_analysis_window(self):
+        """When the run analysis button has been pressed."""
 
         # if there is no file loaded, notify the user and return
         if self.fh.no_file():
             self.show_message(no_file_message_type,
                               no_file_title, no_file_message)
             return
+
+        # the frame that appears right after clicking the button
+        self.ra_pre_window = Frame(self.vis_canvas)
+        self.ra_pre_window.configure(
+            bg=default_label_color, width=ra_pre_window_w, height=ra_pre_window_h)
+        self.ra_pre_window.pack_propagate(False)
+
+        # the label showing the info text
+        ra_pre_window_label = Label(self.ra_pre_window)
+        ra_pre_window_label.configure(
+            bg=default_label_color, fg=default_font_color, text=ra_pre_window_text, font=(standard_font, ra_pre_window_font_size), pady=10)
+        ra_pre_window_label.pack()
+
+        # the text input field
+        text_input_field = Text(self.ra_pre_window)
+        text_input_field.configure(height=1, width=30, font=(
+            standard_font, ra_pre_window_font_size), bg=default_label_color, fg=default_font_color)
+        text_input_field.pack()
+
+        self.ra_pre_window.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+        # focus the text input field right away
+        text_input_field.focus_set()
+
+        # enter starts the analysis with the current text input
+        text_input_field.bind('<Return>', lambda event: self.run_analysis(
+            event, text_input_field.get("1.0", "end")))
+
+    def run_analysis(self, event, text_file_name: str):
+        """
+        Performs the analysis.
+        """
+
+        self.ra_pre_window.destroy()
 
         # manually check if there is at least one analysis option selected
         do_umap = self.umap_check.get()
@@ -396,10 +435,21 @@ class UI:
 
         self.enable_loading_panel()
 
+        # first, we need to preprocess the data (it also updates the file if needed)
+        try:
+            last_index = len(text_file_name) - 1
+            text_file_name = text_file_name[0:last_index]
+            self.analysis.preprocess(self.fh, text_file_name)
+        except:
+            self.show_message(preprocess_error_type,
+                              preprocess_error_title, preprocess_error_message)
+            self.disable_loading_panel()
+            return
+
         # for now we only want a simple UMAP projection if the option was enabled
         try:
             if do_umap:
-                self.analysis.umap(self.fh, self.umap_color_var.get())
+                self.analysis.umap(self.umap_color_var.get())
         except:
             self.show_message(
                 umap_error_type, umap_error_title, umap_error_message)

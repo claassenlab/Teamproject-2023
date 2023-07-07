@@ -157,3 +157,26 @@ class FileHandler:
         # write the full file path to the text file as well
         f.write("File: " + self.file_path + "\n\n" + do)
         f.close()
+
+    def write_velocity_gene_list_to_file(self, file_name: str, num: int, lst):
+        """
+        Writes the velocity gene list to a text file with the given name.
+        Location: user/velocity_gene_list
+
+        Args:
+            file_name (str): The name of the file to be created (without .txt)
+            num (int): The total number of velocity genes
+            lst: The velocity gene list
+        """
+
+        f = open("user/velocity_gene_list/" + file_name + ".txt", "w")
+        # write the full file path to the text file as well
+        f.write("File: " + self.file_path + "\n\n")
+        f.write("Number of velocity genes: " + str(num) + "\n\n")
+
+        f.write("Velocity genes:")
+        for i in lst:
+            f.write("\n")
+            f.write(i)
+
+        f.close()
