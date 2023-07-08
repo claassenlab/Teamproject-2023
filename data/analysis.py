@@ -24,6 +24,7 @@ class Analysis:
         self.max_cell_non_0_genes = None
         self.already_data_overview = False
         self.already_preprocessed = False
+        self.already_velocity = False
 
     def update(self, fh: FileHandler):
         """
@@ -49,6 +50,7 @@ class Analysis:
             self.file_path = current_path
             self.already_data_overview = False
             self.already_preprocessed = False
+            self.already_velocity = False
 
     def data_overview(self, fh: FileHandler):
         """
@@ -115,7 +117,16 @@ class Analysis:
                 self.avg_non_0_signal_genes = total_non_0_genes/n_cells
 
         output = ""
-        output += "Dataset overview:" + "\n"
+
+        # inform the user that the data has already been preprocessed
+        # therefore the statistics may show different values to those of the real file
+        # because some genes and cells may have been filtered
+        # maybe there are some use cases for that, so I think it is better than always
+        # maintaining two (heavy) anndata objects only for this little feature here
+        if (self.already_preprocessed):
+            output += "Dataset overview (preprocessed):" + "\n"
+        else:
+            output += "Dataset overview:" + "\n"
         output += "----------------------------------------------------------------------------------------------------------" + "\n"
         output += "Number of cells: " + str(n_cells) + "\n"
         output += "Number of genes: " + str(n_genes) + "\n"
@@ -153,15 +164,34 @@ class Analysis:
             fh.write_velocity_gene_list_to_file(
                 text_file_name, self.adata.n_vars, self.adata.var_names)
 
-    def umap(self, col: str):
+    def compute_velocity(self):
         """
-        Creates the UMAP projections.
+        Computes the velocity using scvelo if not done yet.
         """
 
-        # create the UMAP projection from the loaded and converted file
-        sc.pp.neighbors(self.adata)
-        sc.tl.umap(self.adata)
-        if col == "default":
+        if not self.already_velocity:
+            scv.tl.velocity(self.adata)
+            scv.tl.velocity_graph(self.adata)
+
+    def umap(self, velocity_embedding: str):
+        """
+        Creates the UMAP projection.
+
+        Args:
+            velocity_embedding (str): The velocity embedding mode for the umap projection.
+        """
+
+        if velocity_embedding == "none":
+            sc.pp.neighbors(self.adata)
+            sc.tl.umap(self.adata)
             sc.pl.umap(self.adata)
-        else:
-            sc.pl.umap(self.adata, color=col)
+            return
+
+        self.compute_velocity()
+
+        if velocity_embedding == "cellular":
+            scv.pl.velocity_embedding(self.adata, basis="umap")
+        elif velocity_embedding == "grid":
+            scv.pl.velocity_embedding_grid(self.adata, basis="umap")
+        elif velocity_embedding == "stream":
+            scv.pl.velocity_embedding_stream(self.adata, basis="umap")

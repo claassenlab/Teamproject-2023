@@ -62,7 +62,7 @@ umap_error_title = "UMAP error!"
 umap_error_message = "The UMAP projection could not be created!\nPlease check if your file and the\nselected UMAP options are valid!"
 preprocess_error_type = "error"
 preprocess_error_title = "Preprocessing error!"
-preprocess_error_message = "An error occured while trying to preprocess your data! Please check if the file and the name you entered are valid!"
+preprocess_error_message = "An error occured while trying to preprocess your data!\nPlease check if the file and the name you entered are valid!"
 
 
 class UI:
@@ -120,6 +120,8 @@ class UI:
         self.data_overview_label = None
         self.analysis_menu_window = None
         self.loading_label = None
+        self.do_pre_window = None
+        self.ra_pre_window = None
 
         self.loading_image = PhotoImage(
             file="ui/images/panels/loading_panel.png")
@@ -199,8 +201,8 @@ class UI:
         # analysis menu variables that indicate what options the user chose
         # UMAP
         self.umap_check = IntVar()
-        self.umap_color_var = StringVar()
-        self.umap_color_var.set("default")
+        self.umap_ve_var = StringVar()
+        self.umap_ve_var.set("none")
 
     def place_images(self):
         bottom_bar = Frame(self.sidebar_frame)
@@ -282,36 +284,40 @@ class UI:
             text="UMAP", font=analysis_menu_font, bg=analysis_menu_button_color,
             fg=analysis_menu_text_color, padx=10, variable=self.umap_check)
 
-        self.umap_color_button = Menubutton(umap_frame)
-        umap_menu = Menu(self.umap_color_button)
-        self.umap_color_button.configure(menu=umap_menu)
+        self.umap_ve_button = Menubutton(umap_frame)
+        umap_menu = Menu(self.umap_ve_button)
+        self.umap_ve_button.configure(menu=umap_menu)
 
         umap_menu.add_radiobutton(
-            label="Default", variable=self.umap_color_var, value="default", command=self.update_umap_buttons)
+            label="None", variable=self.umap_ve_var, value="none", command=self.update_umap_buttons)
         umap_menu.add_radiobutton(
-            label="Louvain", variable=self.umap_color_var, value="louvain", command=self.update_umap_buttons)
+            label="Cellular", variable=self.umap_ve_var, value="cellular", command=self.update_umap_buttons)
         umap_menu.add_radiobutton(
-            label="HES4", variable=self.umap_color_var, value="HES4", command=self.update_umap_buttons)
+            label="Grid", variable=self.umap_ve_var, value="grid", command=self.update_umap_buttons)
         umap_menu.add_radiobutton(
-            label="TNFRSF4", variable=self.umap_color_var, value="TNFRSF4", command=self.update_umap_buttons)
+            label="Stream", variable=self.umap_ve_var, value="stream", command=self.update_umap_buttons)
 
         self.update_umap_buttons()
 
         umap_checkbutton.pack(side=LEFT)
-        self.umap_color_button.pack(side=LEFT, padx=30)
+        self.umap_ve_button.pack(side=LEFT, padx=30)
         umap_frame.pack(side=TOP, pady=10)
 
     def update_umap_buttons(self):
         """
         Updates the menu buttons in the UMAP section of the analysis menu so that they show the selected option.
         """
-        self.umap_color_button.configure(
-            text="color = " + self.umap_color_var.get(), font=analysis_menu_font)
+        self.umap_ve_button.configure(
+            text="velocity_embedding = " + self.umap_ve_var.get(), font=analysis_menu_font)
 
         self.mainwindow.update()
 
     def data_overview_window(self):
         """When the data overview button has been pressed."""
+
+        # if there is already an input request, we don't want another one
+        if self.do_pre_window:
+            return
 
         # if there is no file loaded, notify the user and return
         if self.fh.no_file():
@@ -357,6 +363,8 @@ class UI:
 
         try:
             self.do_pre_window.destroy()
+            self.do_pre_window = None
+
             self.enable_loading_panel()
 
             do_string = self.analysis.data_overview(self.fh)
@@ -385,6 +393,10 @@ class UI:
 
     def run_analysis_window(self):
         """When the run analysis button has been pressed."""
+
+        # if there is already an input request, we don't want another one
+        if self.ra_pre_window:
+            return
 
         # if there is no file loaded, notify the user and return
         if self.fh.no_file():
@@ -425,6 +437,7 @@ class UI:
         """
 
         self.ra_pre_window.destroy()
+        self.ra_pre_window = None
 
         # manually check if there is at least one analysis option selected
         do_umap = self.umap_check.get()
@@ -449,7 +462,7 @@ class UI:
         # for now we only want a simple UMAP projection if the option was enabled
         try:
             if do_umap:
-                self.analysis.umap(self.umap_color_var.get())
+                self.analysis.umap(self.umap_ve_var.get())
         except:
             self.show_message(
                 umap_error_type, umap_error_title, umap_error_message)
