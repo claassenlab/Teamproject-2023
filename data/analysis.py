@@ -1,5 +1,6 @@
 import scanpy as sc
 from data.file_handler import FileHandler
+import scvelo as scv
 
 
 # Please note: Converting and reading needs a lot of time. Therefore, it is a good idea
@@ -21,6 +22,9 @@ class Analysis:
         self.min_cell_non_0_genes = None
         self.max_num_non_0_genes = None
         self.max_cell_non_0_genes = None
+        self.already_data_overview = False
+        self.already_preprocessed = False
+        self.already_velocity = False
 
     def update(self, fh: FileHandler):
         """
@@ -44,13 +48,9 @@ class Analysis:
             self.adata = sc.read_loom(current_path)
             # and update the file path of this object
             self.file_path = current_path
-            return True
-
-        return False
-
-    def no_data(self):
-        """Returns whether there is data to process."""
-        return self.file_path == None
+            self.already_data_overview = False
+            self.already_preprocessed = False
+            self.already_velocity = False
 
     def data_overview(self, fh: FileHandler):
         """
@@ -64,11 +64,7 @@ class Analysis:
             string: A multi-line string which the UI uses to display the information.
         """
 
-        maybe_upate = self.update(fh)
-
-        # if there is no data
-        if self.no_data():
-            return None
+        self.update(fh)
 
         # each row corresponds to a cell
         n_cells = self.adata.n_obs
@@ -77,42 +73,60 @@ class Analysis:
         n_genes = self.adata.n_vars
 
         # only do costly operations when there is an update required
-        if (maybe_upate):
+        if not self.already_data_overview:
 
-            total_non_0_genes = 0
+            # if the dimensions of X are too large, it takes decades to go through the matrix
+            if (n_cells * n_genes > 9999999):
+                self.min_cell_non_0_genes = "NA"
+                self.max_cell_non_0_genes = "NA"
+                self.avg_non_0_signal_genes = "NA"
+                self.min_num_non_0_genes = "NA"
+                self.max_num_non_0_genes = "NA"
+            else:
 
-            # get the cell with the minimum number of non-zero signal genes
-            self.min_num_non_0_genes = n_genes + 1
-            self.min_cell_non_0_genes = None
+                total_non_0_genes = 0
 
-            # get the cell with the maximum number of non-zero signal genes
-            self.max_num_non_0_genes = -1
-            self.max_cell_non_0_genes = None
+                # get the cell with the minimum number of non-zero signal genes
+                self.min_num_non_0_genes = n_genes + 1
+                self.min_cell_non_0_genes = None
 
-            for i in range(n_cells):
-                # count the non-zero signal genes in the current cell
-                non_0_genes_cell = 0
-                for j in range(n_genes):
-                    if (self.adata.X[i, j] != 0):
-                        non_0_genes_cell += 1
+                # get the cell with the maximum number of non-zero signal genes
+                self.max_num_non_0_genes = -1
+                self.max_cell_non_0_genes = None
 
-                # check if the min/max cell needs to be updated
-                if non_0_genes_cell < self.min_num_non_0_genes:
-                    self.min_num_non_0_genes = non_0_genes_cell
-                    self.min_cell_non_0_genes = self.adata.obs_names[i]
-                if non_0_genes_cell > self.max_num_non_0_genes:
-                    self.max_num_non_0_genes = non_0_genes_cell
-                    self.max_cell_non_0_genes = self.adata.obs_names[i]
+                for i in range(n_cells):
+                    # count the non-zero signal genes in the current cell
+                    non_0_genes_cell = 0
+                    for j in range(n_genes):
+                        if (self.adata.X[i, j] != 0):
+                            non_0_genes_cell += 1
 
-                # update total non-zero signal genes count
-                total_non_0_genes += non_0_genes_cell
+                    # check if the min/max cell needs to be updated
+                    if non_0_genes_cell < self.min_num_non_0_genes:
+                        self.min_num_non_0_genes = non_0_genes_cell
+                        self.min_cell_non_0_genes = self.adata.obs_names[i]
+                    if non_0_genes_cell > self.max_num_non_0_genes:
+                        self.max_num_non_0_genes = non_0_genes_cell
+                        self.max_cell_non_0_genes = self.adata.obs_names[i]
 
-            # get the average amount of non-zero genes per cell by counting how many
-            # genes have a non-zero signal and dividing by the amount of cells
-            self.avg_non_0_signal_genes = total_non_0_genes/n_cells
+                    # update total non-zero signal genes count
+                    total_non_0_genes += non_0_genes_cell
+
+                # get the average amount of non-zero genes per cell by counting how many
+                # genes have a non-zero signal and dividing by the amount of cells
+                self.avg_non_0_signal_genes = total_non_0_genes/n_cells
 
         output = ""
-        output += "Dataset overview:" + "\n"
+
+        # inform the user that the data has already been preprocessed
+        # therefore the statistics may show different values to those of the real file
+        # because some genes and cells may have been filtered
+        # maybe there are some use cases for that, so I think it is better than always
+        # maintaining two (heavy) anndata objects only for this little feature here
+        if (self.already_preprocessed):
+            output += "Dataset overview (preprocessed):" + "\n"
+        else:
+            output += "Dataset overview:" + "\n"
         output += "----------------------------------------------------------------------------------------------------------" + "\n"
         output += "Number of cells: " + str(n_cells) + "\n"
         output += "Number of genes: " + str(n_genes) + "\n"
@@ -125,22 +139,59 @@ class Analysis:
             str(self.max_cell_non_0_genes) + \
             " (" + str(self.max_num_non_0_genes) + " genes)"
 
+        self.already_data_overview = True
+
         return output
 
-    def umap(self, fh: FileHandler, col: str):
+    def preprocess(self, fh: FileHandler, text_file_name: str):
         """
-        Creates the UMAP projections.
+        Preprocessing of the data (get rid of rare genes and cells).
+        This method is always called when the run analysis button has been pressed
+        and before any other analysis (see main_menu).
+        It also makes sure that the correct file is being processed.
+        It (maybe) writes the velocity gene list to a text file with the given name.
         """
 
         self.update(fh)
 
-        if self.no_data():
+        if not self.already_preprocessed:
+            scv.pp.filter_and_normalize(self.adata)
+            scv.pp.moments(self.adata)
+            self.already_preprocessed = True
+
+        # write to file
+        if len(text_file_name) > 0:
+            fh.write_velocity_gene_list_to_file(
+                text_file_name, self.adata.n_vars, self.adata.var_names)
+
+    def compute_velocity(self):
+        """
+        Computes the velocity using scvelo if not done yet.
+        """
+
+        if not self.already_velocity:
+            scv.tl.velocity(self.adata)
+            scv.tl.velocity_graph(self.adata)
+
+    def umap(self, velocity_embedding: str):
+        """
+        Creates the UMAP projection.
+
+        Args:
+            velocity_embedding (str): The velocity embedding mode for the umap projection.
+        """
+
+        if velocity_embedding == "none":
+            sc.pp.neighbors(self.adata)
+            sc.tl.umap(self.adata)
+            sc.pl.umap(self.adata)
             return
 
-        # create the UMAP projection from the loaded and converted file
-        sc.pp.neighbors(self.adata)
-        sc.tl.umap(self.adata)
-        if col == "default":
-            sc.pl.umap(self.adata)
-        else:
-            sc.pl.umap(self.adata, color=col)
+        self.compute_velocity()
+
+        if velocity_embedding == "cellular":
+            scv.pl.velocity_embedding(self.adata, basis="umap")
+        elif velocity_embedding == "grid":
+            scv.pl.velocity_embedding_grid(self.adata, basis="umap")
+        elif velocity_embedding == "stream":
+            scv.pl.velocity_embedding_stream(self.adata, basis="umap")
